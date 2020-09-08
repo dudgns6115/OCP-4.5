@@ -95,4 +95,4 @@ suod firewall-cmd --reload
 dnf install tigervnc
 
 7-2 vnc서버로 원격접속
-vncviewer <vnc server domain or IP>:5902
+vncviewer <vnc server domain or IP>:590N
