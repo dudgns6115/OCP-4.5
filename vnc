@@ -1,0 +1,98 @@
+vncserver: CentOS-8.2.2004-x86_64-minimal.iso
+
+======================================================================================================
+사전 설정
+
+0. 그래픽 도구 설치
+dnf groupinstall -y "workstation"
+
+0-1 시스템 재시작
+systemctl set-default graphical
+reboot
+
+0-2 selinux 끄기
+setenforce 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+======================================================================================================
+1. vnc 서버 설치
+sudo dnf install tigervnc-server -y
+
+======================================================================================================
+2. /etc/gdm/custom.conf 설정파일 수정
+
+# CentOS 8은 기본적으로 기본 X서버인 Wayland를 사용한다. VNC 로그인이 작동하기 위해 로그인 화면에서 Xorg서버를 사용하도록 설정을 바꿔준다.
+/etc/gdm/custom.conf 의 #WaylandEnable=false 줄 주석 제거
+
+sed -i 's/#WaylandEnable/WaylandEnable/' /etc/gdm/custom.conf
+
+======================================================================================================
+3. 재부팅 후 원격접속할 사용자로 로그인&홈 디렉토리에 vnc 시스템 구성파일 생성
+reboot
+mkdir -p ~/.config/systemd/user
+vim /etc/systemd/system/vncserver@.server
+[Unit]
+Description=Remote desktop service (VNC)
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStartPre=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
+ExecStart=/usr/bin/vncserver %i -geometry 1280×1024"
+ExecStop=/usr/bin/vncserver -kill %i
+Restart=on-success
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target
+
+# /usr/lib/systemd/system/vncserver@.service 파일을 복사해 설정값만 수정하는 것도 가능
+cp /usr/lib/systemd/user/vncserver@.service ~/.config/systemd/user
+
+======================================================================================================
+4. 변경사항 적용을 위해 reload systemd 
+systemctl --user daemon-reload
+
+# Failed to connect to bus : No such file or directory 오류가 발생 시
+# XDG_RUNTIME_DIR 환경 변수를 올바르게 설정해야 함 -> 수동으로 설정해도 문제 해결 불가
+# export XDG_RUNTIME_DIR=/run/user/$(id -u)
+# 로그아웃 후 원격접속 사용자로 재로그인 해야함
+# systemctl --user show-environment 로 환경변수 확인
+
+======================================================================================================
+5. 원격 접속할 사용자에 vnc 패스워드 설정
+vncpasswd
+Password:
+Verify:
+Would you like to enter a view-only password (y/n)? n
+A view-only password is not used
+
+# $HOME/.vnc/passwd 에 패스워드 저장
+
+======================================================================================================
+6. vnc 서비스 시작 & 방화벽 등록
+
+# vnc 서비스는 5900 + N번의 포트 사용
+6-1 사용하지 않은 포트 번호 확인
+echo $DISPLAY
+
+6-2 N번 포트로 서비스 시작
+systemctl enable  vncserver@:N.service --now
+
+6-3 사용자가 로그아웃해도 활성화하도록 설정
+loginctl enable-linger
+
+6-4 vnc 서비스가 사용하는 포트 확인 후 방화벽 등록
+ss -alt | grep 590
+sudo firewall-cmd --add-port=590N/tcp --permanent
+suod firewall-cmd --reload
+
+======================================================================================================
+
+7. vnc client에서 접속 테스트
+
+7-1 vnc 설치
+dnf install tigervnc
+
+7-2 vnc서버로 원격접속
+vncviewer <vnc server domain or IP>:5902
