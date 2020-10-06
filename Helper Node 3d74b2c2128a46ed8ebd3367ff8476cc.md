@@ -200,7 +200,7 @@ chmod o+r /var/www/html/ignition/.ign
 
 ### 아키텍쳐 구성도
 
-![Helper](Helper%20Node%203d74b2c2128a46ed8ebd3367ff8476cc/__.png)
+![Helper](https://github.com/dudgns6115/OpenShift-4.4/blob/master/__.png)
 
 ### 0. 물리적 머신 준비
 
