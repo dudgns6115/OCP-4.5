@@ -53,10 +53,16 @@
 # OCP 4.5 클러스터 아키텍처
 
 ## Bootstrap
+OCP는 Master 노드에 필요한 정보를 제공하기 위한 초기 설정동안 일시적인 Bootstrap 노드를 사용한다. 클러스터를 어떻게 생성할지 명세한 Ignition config 파일을 이용해 부팅을 시작한다. Bootstrap 노드가 ignition config 파일을 바탕으로 Master 노드를 구성하고, Master 노드가 Worker 노드를 생성한다. Bootstrap 머신은 OS로 Red Hat CoreOS(RHCOS)를 사용한다.
 
 ## Master
+ Control plane 역할을 하는 모든 머신들이 Master 머신들이기 때문에, 용어를 설명하는데 'Master'와 'Control plane'은 같은 의미의 용어로 사용된다.
+ Master 노드는 전체 클러스터 환경의 제어기능을 수행하는 서버이다. OpenShift와 관련된 모든 오브젝트의 생성 및 관리, 스케줄링을 담당한다. 클러스터를 관리하기 위한 Kubernetes 서비스들(API 서버, etcd, Controller Manager 서버 등)을 하나의 OpenShift 바이너리에 포함한다. OCP 4.5의 모든 Control plane 머신에는 운영체제로 반드시 RHCOS를 사용해야한다.
+
+3대의 Master 노드를 사용한다. 비록 이론적으로 어떤 수의 master 노드를 사용 가능하더라도, master의 static 파드와 etcd static 파드가 같은 호스트에서 작동하기에 etcd 쿼럼에 의해 그 수가 제한된다. 
 
 ## Worker
+Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하고 관리되는 곳이다. CRI-O(컨테이너 엔진), kubelet(컨테이너의 워크로드의 동작과 정지 요청을 수용하고 만족시키는 서비스), 그리고 kube-proxy(파드와 Worker 간의 의사소통을 관리)와 같은 중요한 서비스들이 각 Worker 노드에서 작동한다. Worker 역할의 머신들은 autoscale되는 명세된 머신 풀에 의해 관리되는 컴퓨팅 워크로드를 구동한다. OCP가 여러 머신 종류를 지원하기 때문에 Worker 머신들은 Compute 머신으로 분류된다. 4.5 릴리스에서 Compute 머신의 유일한 기본 유형이 Worker 머신이기 때문에 'Worker  머신'과 'Compute 머신' 은 같은 의미로 사용된다. Compute 머신에는 운영체제로 RHCOS 뿐만 아니라 Red Hat Enterprise Linux(RHEL)도 사용 할 수 있다.
 
 ## Bastion
 
@@ -73,6 +79,13 @@
 ### FTP, HTTP, NFS
 
 # Helper Node를 이용한 Bare-metal에 클러스터 구축
+> 물리머신 환경
+    - Ubuntu 18.04
+    - 500 GB disk
+    - 8 vCPUs
+    - 20 GB of RAM
+    - 192.168.20.0/24 (wifi)
+
 
 ## Helper Node
 
