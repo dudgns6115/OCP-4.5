@@ -1,9 +1,30 @@
 # 목차
 
 [1. OCP란 무엇인가?](#ocp란-무엇인가?)
-[1-1 Red Hat OpenShift의 특징](#red-hat-openshift의-특징)
+
+  [1.1 Red Hat OpenShift의 특징](#red-hat-openshift의-특징)
 
 [2. OCP 4.5 클러스터 아키텍처](#ocp-4.5-클러스터-아키텍처)
+
+  [2.1 Bootstrap](#bootstrap)
+
+  [2.2 Master](#master)
+
+  [2.3 Worker](#worker)
+
+  [2.4 ](#)
+
+  [2.5 ](#)
+
+  [2.6 ](#)
+
+    [2.6.1 ](#)
+
+    [2.6.2 ](#)
+
+    [2.6.3 ](#)
+
+    [2.6.4 ](#)
 
 [3. Helper Node를 이용한 Bare-metal에 클러스터 구축](#helper-node를-이용한-bare-metal에-클러스터-구축)
 
