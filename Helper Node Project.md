@@ -12,19 +12,19 @@
 
   [2.3 Worker](#worker)
 
-  [2.4 ](#)
+  [2.4 Bastion](#bastion)
 
-  [2.5 ](#)
+  [2.5 HAProxy](#haproxy)
 
-  [2.6 ](#)
+  [2.6 PXE](#pxe)
 
-   [2.6.1 ](#)
+   [2.6.1 DNS](#dns)
 
-   [2.6.2 ](#)
+   [2.6.2 DHCP](#dhcp)
 
-   [2.6.3 ](#)
+   [2.6.3 TFTP](#tftp)
 
-   [2.6.4 ](#)
+   [2.6.4 FTP, HTTP, NFS](#ftp,-http,-nfs)
 
 [3. Helper Node를 이용한 Bare-metal에 클러스터 구축](#helper-node를-이용한-bare-metal에-클러스터-구축)
 
