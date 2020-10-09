@@ -1,17 +1,17 @@
 # 목차
 
 1. [OCP란 무엇인가?](#ocp란-무엇인가?)
-  1. [Red Hat OpenShift의 특징](#red-hat-openshift의-특징)
+    1. [Red Hat OpenShift의 특징](#red-hat-openshift의-특징)
 
 2. [OCP 4.5 클러스터 아키텍처](#ocp-4.5-클러스터-아키텍처)
 
-  1. [Bootstrap](#bootstrap)
+    1. [Bootstrap](#bootstrap)
   
-  2. [Master](#master)
+    2. [Master](#master)
   
-  [2.3 Worker](#worker)
+    3. [Worker](#worker)
   
-  [2.4 Bastion](#bastion)
+    4. [Bastion](#bastion)
   
   [2.5 HAProxy](#haproxy)
   
