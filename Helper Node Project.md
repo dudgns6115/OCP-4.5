@@ -1,6 +1,7 @@
 # 목차
 
 [1. OCP란 무엇인가?](#ocp란-무엇인가?)
+[1-1 Red Hat OpenShift의 특징](#red-hat-openshift의-특징)
 
 [2. OCP 4.5 클러스터 아키텍처](#ocp-4.5-클러스터-아키텍처)
 
@@ -11,8 +12,11 @@
 [5. 서비스 구축과정](#서비스-구축과정)
 
 # OCP란 무엇인가?
+Red Hat OpensShift Container Platform
+하이브리드 클라우드로, 더 나은 애플리케이션을 더 빠르게 빌드하고 제공하기 위한 기업형 쿠버네티스 기반의 플랫폼
 
 ## Red Hat OpenShift의 특징
+
 
 # OCP 4.5 클러스터 아키텍처
 
