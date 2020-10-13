@@ -107,10 +107,27 @@ Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하�
 
 ### 사전설정
 1. 물리 머신 환경
-Ubuntu Desktop 18.04
-virt-manager 설치
-무선 네트워크 드라이버 설치
-가상머신 원격접속을 위한 openssh 설치
+- Ubuntu Desktop 18.04
+- virt-manager 설치
+```
+sudo apt update 
+sudo apt install -y qemu-kvm libvirt-bin bridge-utils virtinst virt-manager 
+sudo systemctl enable libvirtd 
+reboot
+```
+- 무선 네트워크 드라이버 설치
+```
+sudo apt install -y bc module-assistant build-essential dkms git
+sudo m-a prepare 
+git clone https://github.com/tomaspinho/rtl8821ce 
+cd rtl8821ce 
+sudo ./dkms-install.sh 
+lsmod | grep 8821
+```
+- 가상머신 원격접속을 위한 openssh 설치
+```
+sudo apt install -y openssh-server
+```
 
 2. 가상머신 환경	
 <최소 요구사항>
@@ -133,9 +150,10 @@ virt-manager 설치
 |Worker1   |192.168.20.162   |
 
 ### 클러스터 아키텍처
+사진
 
 ### Helper Node 구성
-Helper에 dns를 패키지를 설치하는 등 외부접속이 필요한 때는 공인 IP를 넣어주고 이후에는 자신의 IP 주소를 넣어준다. Node가 부팅 시 dns를 따라가 파일을 불러오기 때문
+> Helper에 dns를 패키지를 설치하는 등 외부접속이 필요한 때는 공인 IP를 넣어주고 이후에는 자신의 IP 주소를 넣어준다. Node가 부팅 시 dns를 따라가 파일을 불러오기 때문
 
 #### Playbook 설정&실행
 
@@ -183,12 +201,13 @@ workers:
     ipaddr: "192.168.20.162"
 ...
 ```
+
 3. playbook 실행
 ```
 ansible-playbook -e @vars-static.yaml -e staticips=true tasks/main.yml
 ```
 
-플레이북 실행 후 Helper Node의 리소스가 제대로 생성되었는지 확인하는 helpernodecheck 명령어
+> 플레이북 실행 후 Helper Node의 리소스가 제대로 생성되었는지 확인하는 helpernodecheck 명령어
 /usr/local/bin/helpernodecheck 로 확인
 
 #### Ignition config 파일 생성
@@ -206,7 +225,7 @@ cat <<EOF > ~/.openshift/pull-secret
 # https://cloud.redhat.com/openshift/install/metal에서 secret 복사&붙여넣기
 EOF
 ```
-이 플레이북은 ~/.ssh/helper_rsa 에 sshkey를 생성한다. 다른 키를 사용하고 싶으면 ~/.ssh/config 를 수정한다.
+> 이 플레이북은 ~/.ssh/helper_rsa 에 sshkey를 생성한다. 다른 키를 사용하고 싶으면 ~/.ssh/config 를 수정한다.
 
 3. install-config.yaml 파일 생성
 ```
@@ -236,6 +255,7 @@ pullSecret: '$(< ~/.openshift/pull-secret)'
 sshKey: '$(< ~/.ssh/helper_rsa.pub)'
 EOF
 ```
+
 4. installation manifest 생성&수정
 ```
 openshift-install create manifests
@@ -260,6 +280,7 @@ spec:
     name: ""
 status: {}
 ```
+
 5. ignition config 생성
 ```
 openshift-install create ignition-configs
@@ -274,18 +295,16 @@ chmod o+r /var/www/html/ignition/.ign
 
 ### Bootstrap/Master/Worker Node 구성
 #### 물리머신에 각 Node의 가상머신 준비
-모든 물리&가상머신은 동일한 무선 네트워크 대역(192.168.20.0) 사용
-물리머신의 무선 네트워크를 가상머신의 bridge로 연결 (NIC : virtio)
-IP주소를 정적으로 설정
-Bootstrap -> Master -> Worker 순으로 가상머신 Set Up
-
-
+- 모든 물리&가상머신은 동일한 무선 네트워크 대역(192.168.20.0) 사용
+- 물리머신의 무선 네트워크를 가상머신의 bridge로 연결 (NIC : virtio)
+- IP주소를 정적으로 설정
+- Bootstrap -> Master -> Worker 순으로 가상머신 설정
 
 #### 가상머신 설치
 RHCOS ISO Installer을 사용하여 인스턴스를 부팅한다.
-booting이 시작되면 boot menu에서 tab을 누른다.
-
-각 Node에 맞는 정적ip와 coreOS 설정을 한 줄로 입력한다. (각 필드는 space로 구분)
+1. booting이 시작되면 boot menu에서 tab을 누른다.
+사진
+2. 각 Node에 맞는 정적ip와 coreOS 설정을 한 줄로 입력한다. (각 필드는 space로 구분)
 
 Bootstrap 입력 예시
 ```
@@ -295,20 +314,19 @@ coreos.inst.install_dev=sda
 coreos.inst.image_url=http://192.168.20.111:8080/install/bios.raw.gz
 coreos.inst.ignition_url=http://192.168.20.111:8080/ignition/bootstrap.ign
 ```
-영구적용되는 정적 IP 설정
+> 영구적용되는 정적 IP 설정
 [ip=<ipaddr>::<defaultgw>:<netmask>:<hostname>:<iface>:none] → 인터페이스 ens3
 DNS 서버 설정: 여러번 입력 가능
 [nameserver=<dnsserver>] → Helper의 IP주소
 
 Bootstrap -> Masters -> Worker 순으로 입력 후 가동
 
-helper node 에서 다음 명령어로 설치 시작
+3. helper node 에서 다음 명령어로 설치 시작
+```
 openshift-install wait-for bootstrap-complete --log-level debug
-
-웹 브라우저에서 Helper의 HAProxy(9000번 포트)를 통해 Node의 상태를 볼 수 있다 http://192.168.20.111:9000
+```
+> 웹 브라우저에서 Helper의 HAProxy(9000번 포트)를 통해 Node의 상태를 볼 수 있다 http://192.168.20.111:9000
 Master Node가 모두 올라오면 Bootstrap Node를 삭제해도 된다.
-
-
 
 ## 클러스터 구성 후 작업
 
@@ -318,16 +336,6 @@ Master Node가 모두 올라오면 Bootstrap Node를 삭제해도 된다.
 
 
 
-Helper Node를 이용한 Bare-Metal에 클러스터 구축	7
-물리머신 환경	7
-Helper Node	7
-최소 요구사항	7
-구축 절차 오류 과정	7
-최종 구축 과정&결과	11
-사전 설정	11
-클러스터 아키텍처	12
-
-클러스터 구성 완료 후 작업	16
 oc command bash completion	17
 Web console에 Login	17
 기본적인 setting	17
