@@ -300,7 +300,7 @@ chmod o+r /var/www/html/ignition/.ign
 - Bootstrap -> Master -> Worker 순으로 가상머신 설정
 
 #### 가상머신 설치
-RHCOS ISO Installer을 사용하여 인스턴스를 부팅한다.
+RHCOS ISO Installer을 사용하여 가상머신을 부팅한다.(Node에 맞게 리소스 할당)
 사진
 1. booting이 시작되면 boot menu에서 tab을 누른다.
 사진
