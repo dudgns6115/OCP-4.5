@@ -302,6 +302,7 @@ chmod o+r /var/www/html/ignition/.ign
 
 #### 가상머신 설치
 RHCOS ISO Installer을 사용하여 인스턴스를 부팅한다.
+사진
 1. booting이 시작되면 boot menu에서 tab을 누른다.
 사진
 2. 각 Node에 맞는 정적ip와 coreOS 설정을 한 줄로 입력한다. (각 필드는 space로 구분)
@@ -339,10 +340,10 @@ Master Node가 모두 올라오면 Bootstrap Node를 삭제해도 된다.
 oc command bash completion	17
 Web console에 Login	17
 기본적인 setting	17
-4. Service Introduction	19
+
 아키텍처	19
 설명	19
-서비스 구축 과정	20
+
 Grafana	20
 jupyter notebook	21
 Openshift용 Jupyter notebook	21
