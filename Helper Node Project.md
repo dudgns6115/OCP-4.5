@@ -79,7 +79,7 @@ Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하�
 ### FTP, HTTP, NFS
 
 # Helper Node를 이용한 Bare-metal에 클러스터 구축
-    물리머신 환경
+   물리머신 환경
     - Ubuntu 18.04
     - 500 GB disk
     - 8 vCPUs    
@@ -121,7 +121,7 @@ Helper에 dns를 패키지를 설치하는 등 외부접속이 필요한 때는 
 
 #### Playbook 설정&실행
 
-필요 패키지 설치
+1. 필요 패키지 설치
 ```
 # EPEL 설치
 yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
@@ -134,7 +134,7 @@ git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-vars.yaml 파일을 환경에 맞게 수정
+2. vars.yaml 파일을 환경에 맞게 수정
 ```
 cp docs/examples/vars-static.yaml .
 vars-static.yaml
@@ -165,7 +165,7 @@ workers:
     ipaddr: "192.168.20.162"
 ...
 ```
-playbook 실행
+3. playbook 실행
 ```
 ansible-playbook -e @vars-static.yaml -e staticips=true tasks/main.yml
 ```
@@ -173,15 +173,15 @@ ansible-playbook -e @vars-static.yaml -e staticips=true tasks/main.yml
 플레이북 실행 후 Helper Node의 리소스가 제대로 생성되었는지 확인하는 helpernodecheck 명령어
 /usr/local/bin/helpernodecheck 로 확인
 
-Ignition config 파일 생성
+#### Ignition config 파일 생성
 
-작업 디렉토리 생성&이동
+1. 작업 디렉토리 생성&이동
 ```
 mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-시크릿 파일 생성
+2. 시크릿 파일 생성
 ```
 mkdir -p ~/.openshift
 cat <<EOF > ~/.openshift/pull-secret
@@ -190,7 +190,7 @@ EOF
 ```
 이 플레이북은 ~/.ssh/helper_rsa 에 sshkey를 생성한다. 다른 키를 사용하고 싶으면 ~/.ssh/config 를 수정한다.
 
-install-config.yaml 파일 생성
+3. install-config.yaml 파일 생성
 ```
 cat <<EOF > install-config.yaml
 apiVersion: v1
@@ -219,11 +219,13 @@ sshKey: '$(< ~/.ssh/helper_rsa.pub)'
 EOF
 ```
 installation manifest 생성&수정
+```
 openshift-install create manifests
+```
 
 master 노드에 파드 스케줄링을 막기 위해 mastersSchedulable 의 값 수정
 master에 파드를 배치하려면 파일 수정은 건너뛴다.
-
+```
 # 파일 수정
 sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 
@@ -238,8 +240,9 @@ spec:
   policy:
     name: ""
 status: {}
-
+```
 ignition config 생성
+```
 openshift-install create ignition-configs
 
 #가상머신의 네트워크 부팅에 쓰이는 8080포트의 경로로 ignition 파일을 복사
@@ -248,6 +251,7 @@ cp ~/ocp4/.ign /var/www/html/ignition/
 #selinux context 복구 & 권한 추가
 restorecon -vR /var/www/html/
 chmod o+r /var/www/html/ignition/.ign
+```
 
 Bootstrap/Master/Worker Node 구성
 물리머신에 각 Node의 가상머신 준비
@@ -265,12 +269,13 @@ booting이 시작되면 boot menu에서 tab을 누른다.
 각 Node에 맞는 정적ip와 coreOS 설정을 한 줄로 입력한다. (각 필드는 space로 구분)
 
 Bootstrap 입력 예시
+```
 ip=192.168.20.150::192.168.20.1:255.255.255.0:bootstrap.ocp4.example.com:ens3:none
 nameserver=192.168.20.111
 coreos.inst.install_dev=sda
 coreos.inst.image_url=http://192.168.20.111:8080/install/bios.raw.gz
 coreos.inst.ignition_url=http://192.168.20.111:8080/ignition/bootstrap.ign
-
+```
 영구적용되는 정적 IP 설정
 [ip=<ipaddr>::<defaultgw>:<netmask>:<hostname>:<iface>:none] → 인터페이스 ens3
 DNS 서버 설정: 여러번 입력 가능
