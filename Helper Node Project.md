@@ -91,13 +91,12 @@ Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하�
 ### FTP, HTTP, NFS
 
 # Helper Node를 이용한 Bare-metal에 클러스터 구축
-   물리머신 환경
+물리머신 환경
     - Ubuntu 18.04
     - 500 GB disk
     - 8 vCPUs    
     - 20 GB of RAM    
     - 192.168.20.0/24 (wifi)
-
 
 ## Helper Node
 
@@ -129,7 +128,8 @@ lsmod | grep 8821
 sudo apt install -y openssh-server
 ```
 
-2. 가상머신 환경	
+2. 가상머신 환경
+
 <최소 요구사항>
 |    Node   |     Operating SYS    | vCPUs |   RAM  | Disk Storage |
 |:---------:|:--------------------:|:-----:|:------:|:------------:|
@@ -153,7 +153,7 @@ sudo apt install -y openssh-server
 사진
 
 ### Helper Node 구성
-> Helper에 dns를 패키지를 설치하는 등 외부접속이 필요한 때는 공인 IP를 넣어주고 이후에는 자신의 IP 주소를 넣어준다. Node가 부팅 시 dns를 따라가 파일을 불러오기 때문
+Helper에 dns를 패키지를 설치하는 등 외부접속이 필요한 때는 공인 IP를 넣어주고 이후에는 자신의 IP 주소를 넣어준다. Node가 부팅 시 dns를 따라가 파일을 불러오기 때문
 
 #### Playbook 설정&실행
 
