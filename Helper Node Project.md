@@ -114,6 +114,176 @@ Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하�
 |Worker0   |192.168.20.161   |
 |Worker1   |192.168.20.162   |
 
+### 클러스터 아키텍처
+
+### Helper Node 구성
+Helper에 dns를 패키지를 설치하는 등 외부접속이 필요한 때는 공인 IP를 넣어주고 이후에는 자신의 IP 주소를 넣어준다. Node가 부팅 시 dns를 따라가 파일을 불러오기 때문
+
+#### Playbook 설정&실행
+
+필요 패키지 설치
+```
+# EPEL 설치
+yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
+
+# ansible과 git 설치
+yum -y install ansible git
+
+# 플레이북 git에서 가져오기
+git clone https://github.com/RedHatOfficial/ocp4-helpernode
+cd ocp4-helpernode
+```
+
+vars.yaml 파일을 환경에 맞게 수정
+```
+cp docs/examples/vars-static.yaml .
+vars-static.yaml
+---
+staticips: true
+helper:
+  name: "helpnode"
+  ipaddr: "192.168.20.111"
+dns:
+  domain: "example.com"
+  clusterid: "ocp4"
+  forwarder1: "8.8.8.8"
+  forwarder2: "8.8.4.4"
+bootstrap:
+  name: "bootstrap"
+  ipaddr: "192.168.20.150"
+masters:
+  - name: "master0"
+    ipaddr: "192.168.20.151"
+  - name: "master1"
+    ipaddr: "192.168.20.152"
+  - name: "master2"
+    ipaddr: "192.168.20.153"
+workers: 
+  - name: "worker0"
+    ipaddr: "192.168.20.161"
+  - name: "worker1"
+    ipaddr: "192.168.20.162"
+...
+```
+playbook 실행
+```
+ansible-playbook -e @vars-static.yaml -e staticips=true tasks/main.yml
+```
+
+플레이북 실행 후 Helper Node의 리소스가 제대로 생성되었는지 확인하는 helpernodecheck 명령어
+/usr/local/bin/helpernodecheck 로 확인
+
+Ignition config 파일 생성
+
+작업 디렉토리 생성&이동
+```
+mkdir ~/ocp4
+cd ~/ocp4
+```
+
+시크릿 파일 생성
+```
+mkdir -p ~/.openshift
+cat <<EOF > ~/.openshift/pull-secret
+# https://cloud.redhat.com/openshift/install/metal에서 secret 복사&붙여넣기
+EOF
+```
+이 플레이북은 ~/.ssh/helper_rsa 에 sshkey를 생성한다. 다른 키를 사용하고 싶으면 ~/.ssh/config 를 수정한다.
+
+install-config.yaml 파일 생성
+```
+cat <<EOF > install-config.yaml
+apiVersion: v1
+baseDomain: example.com
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: 0
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+metadata:
+  name: ocp4
+networking:
+  clusterNetworks:
+  - cidr: 10.254.0.0/16
+    hostPrefix: 24
+  networkType: OpenShiftSDN
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  none: {}
+pullSecret: '$(< ~/.openshift/pull-secret)'
+sshKey: '$(< ~/.ssh/helper_rsa.pub)'
+EOF
+```
+installation manifest 생성&수정
+openshift-install create manifests
+
+master 노드에 파드 스케줄링을 막기 위해 mastersSchedulable 의 값 수정
+master에 파드를 배치하려면 파일 수정은 건너뛴다.
+
+# 파일 수정
+sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
+
+cat manifests/cluster-scheduler-02-config.yml
+apiVersion: config.openshift.io/v1
+kind: Scheduler
+metadata:
+  creationTimestamp: null
+  name: cluster
+spec:
+  mastersSchedulable: false    # 이 부분 확인
+  policy:
+    name: ""
+status: {}
+
+ignition config 생성
+openshift-install create ignition-configs
+
+#가상머신의 네트워크 부팅에 쓰이는 8080포트의 경로로 ignition 파일을 복사
+cp ~/ocp4/.ign /var/www/html/ignition/
+
+#selinux context 복구 & 권한 추가
+restorecon -vR /var/www/html/
+chmod o+r /var/www/html/ignition/.ign
+
+Bootstrap/Master/Worker Node 구성
+물리머신에 각 Node의 가상머신 준비
+모든 물리&가상머신은 동일한 무선 네트워크 대역(192.168.20.0) 사용
+물리머신의 무선 네트워크를 가상머신의 bridge로 연결 (NIC : virtio)
+IP주소를 정적으로 설정
+Bootstrap -> Master -> Worker 순으로 가상머신 Set Up
+
+
+
+가상머신 설치
+RHCOS ISO Installer을 사용하여 인스턴스를 부팅한다.
+booting이 시작되면 boot menu에서 tab을 누른다.
+
+각 Node에 맞는 정적ip와 coreOS 설정을 한 줄로 입력한다. (각 필드는 space로 구분)
+
+Bootstrap 입력 예시
+ip=192.168.20.150::192.168.20.1:255.255.255.0:bootstrap.ocp4.example.com:ens3:none
+nameserver=192.168.20.111
+coreos.inst.install_dev=sda
+coreos.inst.image_url=http://192.168.20.111:8080/install/bios.raw.gz
+coreos.inst.ignition_url=http://192.168.20.111:8080/ignition/bootstrap.ign
+
+영구적용되는 정적 IP 설정
+[ip=<ipaddr>::<defaultgw>:<netmask>:<hostname>:<iface>:none] → 인터페이스 ens3
+DNS 서버 설정: 여러번 입력 가능
+[nameserver=<dnsserver>] → Helper의 IP주소
+
+Bootstrap -> Masters -> Worker 순으로 입력 후 가동
+
+helper node 에서 다음 명령어로 설치 시작
+openshift-install wait-for bootstrap-complete --log-level debug
+
+웹 브라우저에서 Helper의 HAProxy(9000번 포트)를 통해 Node의 상태를 볼 수 있다 http://192.168.20.111:9000
+Master Node가 모두 올라오면 Bootstrap Node를 삭제해도 된다.
+
 
 
 ## 클러스터 구성 후 작업
