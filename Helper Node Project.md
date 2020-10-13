@@ -14,6 +14,18 @@
         3. [TFTP](#tftp)
         4. [FTP, HTTP, NFS](#ftp,-http,-nfs)
 3. [Helper Node를 이용한 Bare-metal에 클러스터 구축](#helper-node를-이용한-bare-metal에-클러스터-구축)
+    1. [Helper Node](#helper-node)
+    2. [구축 과정 오류](#구축-과정-오류)
+    3. [최종 구축 과정](#최종-구축-과정)
+        1. [사전설정](#사전설정)
+	    2. [클러스터 아키텍처](#클러스터-아키텍처)
+	    3. [Helper Node 구성](#helper-node-구성)
+	        1. [Playbook 설정&실행](#playbook-설정&실행)
+	        2. [Ignition config 파일 생성](#ignition-config-파일-생성)
+	    4. [Bootstrap/Master/Worker Node 구성](#bootstrap/master/worker-node-구성)
+	        1. [물리머신에 각 Node의 가상머신 준비](#물리머신에-각-node의-가상머신-준비)
+	        2. [가상머신 설치](#가상머신-설치)
+    4. [클러스터 구성 완료 후 작업](#클러스터-구성-완료-후-작업)
 4. [서비스 소개](#서비스-소개)
 5. [서비스 구축과정](#서비스-구축과정)
 
@@ -93,8 +105,14 @@ Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하�
 
 ## 최종 구축 과정
 
-가상머신 환경
-	
+### 사전설정
+1. 물리 머신 환경
+Ubuntu Desktop 18.04
+virt-manager 설치
+무선 네트워크 드라이버 설치
+가상머신 원격접속을 위한 openssh 설치
+
+2. 가상머신 환경	
 <최소 요구사항>
 |    Node   |     Operating SYS    | vCPUs |   RAM  | Disk Storage |
 |:---------:|:--------------------:|:-----:|:------:|:------------:|
@@ -218,13 +236,14 @@ pullSecret: '$(< ~/.openshift/pull-secret)'
 sshKey: '$(< ~/.ssh/helper_rsa.pub)'
 EOF
 ```
-installation manifest 생성&수정
+4. installation manifest 생성&수정
 ```
 openshift-install create manifests
 ```
 
-master 노드에 파드 스케줄링을 막기 위해 mastersSchedulable 의 값 수정
+> master 노드에 파드 스케줄링을 막기 위해 mastersSchedulable 의 값 수정
 master에 파드를 배치하려면 파일 수정은 건너뛴다.
+
 ```
 # 파일 수정
 sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
@@ -241,7 +260,7 @@ spec:
     name: ""
 status: {}
 ```
-ignition config 생성
+5. ignition config 생성
 ```
 openshift-install create ignition-configs
 
@@ -253,8 +272,8 @@ restorecon -vR /var/www/html/
 chmod o+r /var/www/html/ignition/.ign
 ```
 
-Bootstrap/Master/Worker Node 구성
-물리머신에 각 Node의 가상머신 준비
+### Bootstrap/Master/Worker Node 구성
+#### 물리머신에 각 Node의 가상머신 준비
 모든 물리&가상머신은 동일한 무선 네트워크 대역(192.168.20.0) 사용
 물리머신의 무선 네트워크를 가상머신의 bridge로 연결 (NIC : virtio)
 IP주소를 정적으로 설정
@@ -262,7 +281,7 @@ Bootstrap -> Master -> Worker 순으로 가상머신 Set Up
 
 
 
-가상머신 설치
+#### 가상머신 설치
 RHCOS ISO Installer을 사용하여 인스턴스를 부팅한다.
 booting이 시작되면 boot menu에서 tab을 누른다.
 
@@ -307,12 +326,7 @@ Helper Node	7
 최종 구축 과정&결과	11
 사전 설정	11
 클러스터 아키텍처	12
-Helper Node 구성	12
-Playbook 설정&실행	12
-Ignition config 파일 생성	13
-Bootstrap/Master/Worker Node 구성	15
-물리머신에 각 Node의 가상머신 준비	15
-가상머신 설치	15
+
 클러스터 구성 완료 후 작업	16
 oc command bash completion	17
 Web console에 Login	17
