@@ -91,11 +91,11 @@ Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하�
 ### FTP, HTTP, NFS
 
 # Helper Node를 이용한 Bare-metal에 클러스터 구축
-물리머신 환경    
-    - Ubuntu 18.04    
-    - 500 GB disk    
-    - 8 vCPUs    
-    - 20 GB of RAM    
+물리머신 환경
+    - Ubuntu 18.04
+    - 500 GB disk
+    - 8 vCPUs
+    - 20 GB of RAM
     - 192.168.20.0/24 (wifi)
 
 ## Helper Node
