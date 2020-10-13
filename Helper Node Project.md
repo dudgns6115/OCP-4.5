@@ -96,15 +96,6 @@ Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하�
 가상머신 환경
 	
 <최소 요구사항>
-
-|Node|Operating SYS|vCPUs|RAM|Disk Storage|
-|----------|:-------------:|------:|
-|Helper|CentOS/RHEL 7 or 8|4|  8 GB|50 GB|
-|Bootstrap|RHCOS|4|16 GB|120 GB|
-|Master|RHCOS|4|16 GB|120 GB|
-|Worker|RHCOS or RHEL 7 or 8|2|  8 GB|120 GB|
-
-
 |    Node   |     Operating SYS    | vCPUs |   RAM  | Disk Storage |
 |:---------:|:--------------------:|:-----:|:------:|:------------:|
 | Helper    | CentOS/RHEL 7 or 8   | 4     |   8 GB | 50 GB        |
@@ -113,14 +104,15 @@ Worker 노드는 사용자에 의해 요청된 실제 워크로드가 동작하�
 | Worker    | RHCOS or RHEL 7 or 8 | 2     |   8 GB | 120 GB       |
 
 <IP 주소 설정>
-|Node|IP address|
-|Helper|192.168.20.111/24|
+|   Node  |    IP address   |
+|:--------|:----------------|
+|Helper   |192.168.20.111/24|
 |Bootstrap|192.168.20.150/24|
-|Master0|192.168.20.151/24|
-|Master1|192.168.20.152/24|
-|Master2|192.168.20.153/24|
-|Worker0|192.168.20.161/24|
-|Worker1|192.168.20.162/24|
+|Master0  |192.168.20.151/24|
+|Master1  |192.168.20.152/24|
+|Master2  |192.168.20.153/24|
+|Worker0  |192.168.20.161/24|
+|Worker1  |192.168.20.162/24|
 
 
 
