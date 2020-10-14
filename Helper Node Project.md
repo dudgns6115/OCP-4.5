@@ -14,7 +14,7 @@
         3. [TFTP](#tftp)
         4. [FTP, HTTP, NFS](#ftp,-http,-nfs)
 3. [Helper Node를 이용한 Bare-metal에 클러스터 구축](#helper-node를-이용한-bare-metal에-클러스터-구축)
-    1. [Helper Node](#helper-node)
+    1. [3.3.4 Helper Node](#334-helper-node)
     2. [구축 과정 오류](#구축-과정-오류)
     3. [최종 구축 과정](#최종-구축-과정)
         1. [사전설정](#사전설정)
@@ -104,7 +104,7 @@ OpenShift Load Balance 노드는 RHEL 8.1 서버를 실행한다.
 - 8 vCPUs- 20 GB of RAM
 - 192.168.20.0/24 (wifi)
 
-## Helper Node
+## 3.3.4 Helper Node
 
 ## 구축 과정 오류
 
