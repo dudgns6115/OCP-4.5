@@ -28,6 +28,7 @@
     4. [클러스터 구성 완료 후 작업](#클러스터-구성-완료-후-작업)
 4. [서비스 소개](#서비스-소개)
 5. [서비스 구축과정](#서비스-구축과정)
+[5.6 merge(pdf + image watermark)](#56-mergepdf--image-watermark)
 
 # OCP란 무엇인가?
 > Red Hat OpensShift Container Platform<br>하이브리드 클라우드로, 더 좋은 애플리케이션을 더 빠르게 빌드하고 제공하기 위한 기업형 쿠버네티스 기반의 플랫폼
@@ -368,3 +369,4 @@ metric  pdf	24
 merge(pdf + image watermark)	24
 gui 환경 셋업	24
 서비스 시연 결과물	
+5.6 merge(pdf + image watermark)
